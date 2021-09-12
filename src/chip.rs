@@ -94,7 +94,7 @@ impl Chip {
     }
 
     pub fn fetch(&mut self) -> u8 {
-        if self.instrucs[self.operation as usize].addr_mode != "IMP" {
+        if self.instrucs[self.operation as usize].addr_mode != AddrMode::IMP{
             self.fetched = self.read(self.addr_abs);
             //println!("fetched: {}", self.fetched);
 
@@ -102,79 +102,88 @@ impl Chip {
         return self.fetched;
     }    
 
-    pub fn call_op(&mut self,fn_name: String) -> u8{
-        match fn_name.as_str() {
-            "BRK" => return self.BRK(),
-            "ORA" => return self.ORA(),
-            "XXX" => return self.XXX(),
-            "NOP" => return self.NOP(),
-            "ASL" => return self.ASL(),
-            "PHP" => return self.PHP(),
-            "BPL" => return self.BPL(),
-            "CLC" => return self.CLC(),
-            "JSR" => return self.JSR(),
-            "AND" => return self.AND(),
-            "BIT" => return self.BIT(),
-            "ROL" => return self.ROL(),
-            "PLP" => return self.PLP(),
-            "BMI" => return self.BMI(),
-            "SEC" => return self.SEC(),
-            "RTI" => return self.RTI(),
-            "EOR" => return self.EOR(),
-            "LSR" => return self.LSR(),
-            "PHA" => return self.PHA(),
-            "JMP" => return self.JMP(),
-            "BVC" => return self.BVC(),
-            "CLI" => return self.CLI(),
-            "RTS" => return self.RTS(),
-            "ADC" => return self.ADC(),
-            "ROR" => return self.ROR(),
-            "PLA" => return self.PLA(),
-            "BVS" => return self.BVS(),
-            "SEI" => return self.SEI(),
-            "STA" => return self.STA(),
-            "STY" => return self.STY(),
-            "STX" => return self.STX(),
-            "DEY" => return self.DEY(),
-            "TXA" => return self.TXA(),
-            "BCC" => return self.BCC(),
-            "TYA" => return self.TYA(),
-            "TXS" => return self.TXS(),
-            "LDY" => return self.LDY(),
-            "LDA" => return self.LDA(),
-            "LDX" => return self.LDX(),
-            "TAY" => return self.TAY(),
-            "TAX" => return self.TAX(),
-            "BCS" => return self.BCS(),
-            "CLV" => return self.CLV(),
-            "TSX" => return self.TSX(),
-            "CPY" => return self.CPY(),
-            "CMP" => return self.CMP(),
-            "DEC" => return self.DEC(),
-            "INY" => return self.INY(),
-            "DEX" => return self.DEX(),
-            "BNE" => return self.BNE(),
-            "CLD" => return self.CLD(),
-            "CPX" => return self.CPX(),
-            "SBC" => return self.SBC(),
-            "INC" => return self.INC(),
-            "INX" => return self.INX(),
-            "BEQ" => return self.BEQ(),
-            "SED" => return self.SED(),
-            
-            "IMP" => return self.IMP(),
-            "IMM" => return self.IMM(),
-            "ZP0" => return self.ZP0(),
-            "ZPX" => return self.ZPX(),
-            "ZPY" => return self.ZPY(),
-            "REL" => return self.REL(),
-            "ABX" => return self.ABX(),
-            "ABS" => return self.ABS(),
-            "ABY" => return self.ABY(),
-            "IND" => return self.IND(),
-            "IZX" => return self.IZX(),
-            "IZY" => return self.IZY(),
+    pub fn call_addr_mode(&mut self,addr_mode: AddrMode) -> u8 {
+        match addr_mode {
 
+            AddrMode::IMP => return self.IMP(),
+            AddrMode::IMM => return self.IMM(),
+            AddrMode::ZP0 => return self.ZP0(),
+            AddrMode::ZPX => return self.ZPX(),
+            AddrMode::ZPY => return self.ZPY(),
+            AddrMode::REL => return self.REL(),
+            AddrMode::ABX => return self.ABX(),
+            AddrMode::ABS => return self.ABS(),
+            AddrMode::ABY => return self.ABY(),
+            AddrMode::IND => return self.IND(),
+            AddrMode::IZX => return self.IZX(),
+            AddrMode::IZY => return self.IZY(),
+
+            _ => println!("Could not call operation / address mode"),
+        }
+        return 0;
+
+    }
+
+    pub fn call_op(&mut self,fn_name: Operation) -> u8{
+        match fn_name {
+            Operation::BRK => return self.BRK(),
+            Operation::ORA => return self.ORA(),
+            Operation::XXX => return self.XXX(),
+            Operation::NOP => return self.NOP(),
+            Operation::ASL => return self.ASL(),
+            Operation::PHP => return self.PHP(),
+            Operation::BPL => return self.BPL(),
+            Operation::CLC => return self.CLC(),
+            Operation::JSR => return self.JSR(),
+            Operation::AND => return self.AND(),
+            Operation::BIT => return self.BIT(),
+            Operation::ROL => return self.ROL(),
+            Operation::PLP => return self.PLP(),
+            Operation::BMI => return self.BMI(),
+            Operation::SEC => return self.SEC(),
+            Operation::RTI => return self.RTI(),
+            Operation::EOR => return self.EOR(),
+            Operation::LSR => return self.LSR(),
+            Operation::PHA => return self.PHA(),
+            Operation::JMP => return self.JMP(),
+            Operation::BVC => return self.BVC(),
+            Operation::CLI => return self.CLI(),
+            Operation::RTS => return self.RTS(),
+            Operation::ADC => return self.ADC(),
+            Operation::ROR => return self.ROR(),
+            Operation::PLA => return self.PLA(),
+            Operation::BVS => return self.BVS(),
+            Operation::SEI => return self.SEI(),
+            Operation::STA => return self.STA(),
+            Operation::STY => return self.STY(),
+            Operation::STX => return self.STX(),
+            Operation::DEY => return self.DEY(),
+            Operation::TXA => return self.TXA(),
+            Operation::BCC => return self.BCC(),
+            Operation::TYA => return self.TYA(),
+            Operation::TXS => return self.TXS(),
+            Operation::LDY => return self.LDY(),
+            Operation::LDA => return self.LDA(),
+            Operation::LDX => return self.LDX(),
+            Operation::TAY => return self.TAY(),
+            Operation::TAX => return self.TAX(),
+            Operation::BCS => return self.BCS(),
+            Operation::CLV => return self.CLV(),
+            Operation::TSX => return self.TSX(),
+            Operation::CPY => return self.CPY(),
+            Operation::CMP => return self.CMP(),
+            Operation::DEC => return self.DEC(),
+            Operation::INY => return self.INY(),
+            Operation::DEX => return self.DEX(),
+            Operation::BNE => return self.BNE(),
+            Operation::CLD => return self.CLD(),
+            Operation::CPX => return self.CPX(),
+            Operation::SBC => return self.SBC(),
+            Operation::INC => return self.INC(),
+            Operation::INX => return self.INX(),
+            Operation::BEQ => return self.BEQ(),
+            Operation::SED => return self.SED(),
+            
             _ => println!("Could not call operation / address mode"),
         }
         return 0;
@@ -356,7 +365,7 @@ impl Chip {
         self.set_flag(Flag::C, (self.temp & 0xFF00) > 0);
         self.set_flag(Flag::Z, (self.temp & 0x00FF) == 0x0000);
         self.set_flag(Flag::N, ((1 << 7) as u16 & self.temp) != 0); //Should be ok??
-        if self.instrucs[self.operation as usize].addr_mode == "IMP"{
+        if self.instrucs[self.operation as usize].addr_mode == AddrMode::IMP{
             self.a = self.temp as u8;
         } else {
             self.write(self.addr_abs, self.temp as u8);
@@ -412,7 +421,7 @@ impl Chip {
         self.set_flag(Flag::C, (self.temp as u16 & 0xFF00) != 0);
         self.set_flag(Flag::Z, (self.temp & 0x00FF) == 0x0000);
         self.set_flag(Flag::N, (self.temp & 0x0080) != 0); //Should be ok??
-        if self.instrucs[self.operation as usize].addr_mode == "IMP"{
+        if self.instrucs[self.operation as usize].addr_mode == AddrMode::IMP{
             self.a = (self.temp & 0x00FF) as u8;
         } else {
             self.write(self.addr_abs, (self.temp & 0x00FF) as u8);
@@ -455,7 +464,7 @@ impl Chip {
         self.temp = (self.fetched >> 1) as u16;
         self.set_flag(Flag::Z, (self.temp & 0x00FF) == 0x0000);
         self.set_flag(Flag::N, (self.temp & 0x0080) != 0); //Should be ok??
-        if self.instrucs[self.operation as usize].addr_mode == "IMP"{
+        if self.instrucs[self.operation as usize].addr_mode == AddrMode::IMP{
             self.a = self.temp as u8; //Cast to u8?
         } else {
             self.write(self.addr_abs, self.temp as u8);
@@ -541,7 +550,7 @@ impl Chip {
         self.set_flag(Flag::C, (self.fetched & 0x01) != 0);
         self.set_flag(Flag::Z, (self.temp & 0x00FF) == 0x0000);
         self.set_flag(Flag::N, (self.temp & 0x0080) != 0); //Should be ok??
-        if self.instrucs[self.operation as usize].addr_mode == "IMP"{
+        if self.instrucs[self.operation as usize].addr_mode == AddrMode::IMP{
             self.a = (self.temp & 0x00FF) as u8;
         } else {
             self.write(self.addr_abs, (self.temp & 0x00FF) as u8);
@@ -814,12 +823,12 @@ impl Chip {
             self.set_flag(Flag::U, true);
             self.pc = self.pc + 1;
             self.cycles_remaining = self.instrucs[self.operation as usize].n_cycles;
-            let addr_mode: String = self.instrucs[self.operation as usize].addr_mode.clone();
-            let operation: String = self.instrucs[self.operation as usize].operation.clone();
 
-            let a = self.call_op(addr_mode);
 
-            let b = self.call_op(operation);
+
+            let a = self.call_addr_mode(self.instrucs[self.operation as usize].addr_mode);
+
+            let b = self.call_op(self.instrucs[self.operation as usize].operation);
 
             self.cycles_remaining += a&b;
             self.set_flag(Flag::U, true); //Not needed?
@@ -830,7 +839,7 @@ impl Chip {
         }
         self.cycles_remaining -= 1;
 
-        self.clock_count += 1;
+        //self.clock_count += 1;
     }
 
     pub fn nmi(&mut self) {

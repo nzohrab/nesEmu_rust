@@ -12,3 +12,5 @@ overflow-checks = false     # Disable integer overflow checks.
 stick = "0.10.1"
 arr_macro = "0.1.3"
 minifb = "0.19.3"
+time = "*"
+fixed-map = "0.7.2"

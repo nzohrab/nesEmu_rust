@@ -163,54 +163,54 @@ impl PPU{
             cart: std::ptr::null_mut(),
 
             stat_reg: crate::my_bits!{ //u8
-                "unused" => 0..5,
-                "sprite_overflow" => 5..6,
-                "sprite_zero_hit" => 6..7,
-                "vertical_blank" => 7..8
+                BitsId::Unused => 0..5,
+                BitsId::SpriteOverflow => 5..6,
+                BitsId::SpriteZeroHit => 6..7,
+                BitsId::VerticalBlank => 7..8
             },
 
             mask_reg: crate::my_bits!{ //u8
-                "grayscale" => 0..1,
-                "render_background_left" => 1..2,
-                "render_sprites_left" => 2..3,
-                "render_background" => 3..4,
-                "render_sprites" => 4..5,
-                "enhance_red" => 5..6,
-                "enhance_green" => 6..7,
-                "enhance_blue" => 7..8
+                BitsId::Grayscale => 0..1,
+                BitsId::RenderBackgroundLeft => 1..2,
+                BitsId::RenderSpritesLeft => 2..3,
+                BitsId::RenderBackground => 3..4,
+                BitsId::RenderSprites => 4..5,
+                BitsId::EnhanceRed => 5..6,
+                BitsId::EnhanceGreen => 6..7,
+                BitsId::EnhanceBlue => 7..8
             },
 
             //0b00010000
             ctrl_reg: crate::my_bits!{//u8
 
-                "nametable_x" => 0..1,
-                "nametable_y" => 1..2,
-                "increment_mode" => 2..3,
-                "pattern_sprite" => 3..4,
-                "pattern_background" => 4..5,
-                "sprite_size" => 5..6,
-                "slave_mode" => 6..7,
-                "enable_nmi" => 7..8
+                BitsId::NametableX => 0..1,
+                BitsId::NametableY => 1..2,
+                BitsId::IncrementMode => 2..3,
+                BitsId::PatternSprite => 3..4,
+                BitsId::PatternBackground => 4..5,
+                BitsId::SpriteSize => 5..6,
+                BitsId::SlaveMode => 6..7,
+                BitsId::EnableNmi => 7..8
             },
 
             addr_latch: 0x00,
             ppu_data_buffer: 0x00,
             vram_addr: crate::my_bits!{
-                "coarse_x" => 0..5,
-                "coarse_y" => 5..10,
-                "nametable_x" => 10..11,
-                "nametable_y" => 11..12,
-                "fine_y" => 12..15,
-                "unused" => 15..16
+                BitsId::CoarseX => 0..5,
+                BitsId::CoarseY => 5..10,
+                BitsId::NametableX => 10..11,
+                BitsId::NametableY => 11..12,
+                BitsId::FineY => 12..15,
+                BitsId::Unused => 15..16
             },
 
             tram_addr: crate::my_bits!{
-                "coarse_x" => 0..5,
-                "coarse_y" => 5..10,
-                "nametable_x" => 10..11,
-                "nametable_y" => 11..12,
-                "fine_y" => 12..15,
-                "unused" => 15..16
+                BitsId::CoarseX => 0..5,
+                BitsId::CoarseY => 5..10,
+                BitsId::NametableX => 10..11,
+                BitsId::NametableY => 11..12,
+                BitsId::FineY => 12..15,
+                BitsId::Unused => 15..16
             },
             fine_x: 0,
             nmi: false,
@@ -255,28 +255,28 @@ impl PPU{
     pub fn t(&mut self){
         // println!("testing");
         // self.stat_reg.bits = 0;
-        // self.stat_reg.set("vertical_blank", 1);
+        // self.stat_reg.set(BitsId::VerticalBlank, 1);
         // println!("{}", self.stat_reg.bits);
 
         // self.stat_reg.bits = 0;
-        // self.stat_reg.set("unused",1);
+        // self.stat_reg.set(BitsId::Unused,1);
         // println!("{}", self.stat_reg.bits);
 
     }
 
-    pub fn get_fb(&mut self) -> [u32; 256*240]{ //Slow
-        let mut buf: [u32; 256*240] = [0u32; 256*240];
-        let mut i: usize = 0;
-        for row in &self.sprScreen.pixels {
-            for col in row{
+    // pub fn get_fb(&mut self) -> [u32; 256*240]{ //Slow
+    //     let mut buf: [u32; 256*240] = [0u32; 256*240];
+    //     let mut i: usize = 0;
+    //     for row in &self.sprScreen.pixels {
+    //         for col in row{
 
-                buf[i] = col.to_u32();
-                i += 1;
-            }
-        }
-        self.frame_complete = false;
-        return buf;
-    }
+    //             buf[i] = col.to_u32();
+    //             i += 1;
+    //         }
+    //     }
+    //     self.frame_complete = false;
+    //     return buf;
+    // }
 
     pub fn cpu_write(&mut self, address: u16, data: u8){
 
@@ -284,14 +284,14 @@ impl PPU{
 
         match address{
             0x0000 => {
-                self.ctrl_reg.bits = data as u128;
-                self.tram_addr.set("nametable_x", self.ctrl_reg.get("nametable_x"));
-                self.tram_addr.set("nametable_y", self.ctrl_reg.get("nametable_y"));
+                self.ctrl_reg.bits = data as u16;
+                self.tram_addr.set(BitsId::NametableX, self.ctrl_reg.get(BitsId::NametableX));
+                self.tram_addr.set(BitsId::NametableY, self.ctrl_reg.get(BitsId::NametableY));
                 //println!("{:#010b}", self.ctrl_reg.bits);
             }
 
             0x0001 => {
-                self.mask_reg.bits = data as u128;
+                self.mask_reg.bits = data as u16;
                 //println!("{:#010b}", self.mask_reg.bits);
             }
             
@@ -301,28 +301,28 @@ impl PPU{
             0x0005 => {
                 if self.addr_latch == 0 {
                     self.fine_x = data & 0x07;
-                    self.tram_addr.set("coarse_x", data as u128 >> 3);
+                    self.tram_addr.set(BitsId::CoarseX, data as u16 >> 3);
                     self.addr_latch = 1
                 } else {
-                    self.tram_addr.set("fine_y", data as u128 & 0x07);
-                    self.tram_addr.set("coarse_y", data as u128 >> 3);
+                    self.tram_addr.set(BitsId::FineY, data as u16 & 0x07);
+                    self.tram_addr.set(BitsId::CoarseY, data as u16 >> 3);
                     self.addr_latch = 0;
                 }
 
             }
             0x0006 => {
                 if self.addr_latch == 0 {
-                    self.tram_addr.bits = (((data as u16 & 0x3F) << 8) | ((self.tram_addr.bits as u16) & 0x00FF)) as u128;
+                    self.tram_addr.bits = (((data as u16 & 0x3F) << 8) | ((self.tram_addr.bits as u16) & 0x00FF));
                     self.addr_latch = 1
                 } else {
-                    self.tram_addr.bits = ((self.tram_addr.bits & 0xFF00) as u16 | data as u16) as u128;
+                    self.tram_addr.bits = ((self.tram_addr.bits & 0xFF00) as u16 | data as u16);
                     self.vram_addr.bits = self.tram_addr.bits;
                     self.addr_latch = 0;
                 }
             }
             0x0007 => {
                 self.ppu_write(self.vram_addr.bits as u16, data); 
-                self.vram_addr.bits = (self.vram_addr.bits + if self.ctrl_reg.get("increment_mode") == 1 {32} else {1}) as u128;
+                self.vram_addr.bits = (self.vram_addr.bits + if self.ctrl_reg.get(BitsId::IncrementMode) == 1 {32} else {1});
             }
             _ => {}
 
@@ -337,7 +337,7 @@ impl PPU{
             0x0002 => {
                 //self.stat_reg.set_vertical_blank(1);
                 data = (self.stat_reg.bits as u8 & 0xE0) | (self.ppu_data_buffer & 0x1F);
-                self.stat_reg.set("vertical_blank",0);
+                self.stat_reg.set(BitsId::VerticalBlank,0);
                 self.addr_latch = 0;
             }
             0x0003 => {}
@@ -351,7 +351,7 @@ impl PPU{
                 if self.vram_addr.bits >= 0x3F00{
                      data = self.ppu_data_buffer;
                 }
-                self.vram_addr.bits = (self.vram_addr.bits + if self.ctrl_reg.get("increment_mode") == 1 {32} else {1}) as u128;
+                self.vram_addr.bits = (self.vram_addr.bits + if self.ctrl_reg.get(BitsId::IncrementMode) == 1 {32} else {1});
             }
             _ => {}
 
@@ -388,7 +388,7 @@ impl PPU{
                 if m_address == 0x0014 {m_address = 0x0004}
                 if m_address == 0x0018 {m_address = 0x0008}
                 if m_address == 0x001C {m_address = 0x000C}
-                data = self.tblPalette[m_address as usize] & (if self.mask_reg.get("grayscale") != 0 {0x30} else {0x3F})
+                data = self.tblPalette[m_address as usize] & (if self.mask_reg.get(BitsId::Grayscale) != 0 {0x30} else {0x3F})
             }
         }
         return data;
@@ -428,50 +428,50 @@ impl PPU{
     }
 
     fn inc_scroll_x(&mut self) {
-        if self.mask_reg.get("render_background") != 0 || self.mask_reg.get("render_sprites") != 0{
-            if self.vram_addr.get("coarse_x") == 31{
-                self.vram_addr.set("coarse_x", 0);
+        if self.mask_reg.get(BitsId::RenderBackground) != 0 || self.mask_reg.get(BitsId::RenderSprites) != 0{
+            if self.vram_addr.get(BitsId::CoarseX) == 31{
+                self.vram_addr.set(BitsId::CoarseX, 0);
 
-                self.vram_addr.set("nametable_x", !self.vram_addr.get("nametable_x"));
+                self.vram_addr.set(BitsId::NametableX, !self.vram_addr.get(BitsId::NametableX));
             } else{
-                self.vram_addr.set("coarse_x", self.vram_addr.get("coarse_x") + 1);
+                self.vram_addr.set(BitsId::CoarseX, self.vram_addr.get(BitsId::CoarseX) + 1);
             }
         } 
     }
 
     fn inc_scroll_y(&mut self) {
-        if self.mask_reg.get("render_background") != 0 || self.mask_reg.get("render_sprites") != 0{
-            if self.vram_addr.get("fine_y") < 7{
-                self.vram_addr.set("fine_y", self.vram_addr.get("fine_y") + 1);
+        if self.mask_reg.get(BitsId::RenderBackground) != 0 || self.mask_reg.get(BitsId::RenderSprites) != 0{
+            if self.vram_addr.get(BitsId::FineY) < 7{
+                self.vram_addr.set(BitsId::FineY, self.vram_addr.get(BitsId::FineY) + 1);
             } else{
-                self.vram_addr.set("fine_y", 0);
+                self.vram_addr.set(BitsId::FineY, 0);
 
-                if self.vram_addr.get("coarse_y") == 29{
-                    self.vram_addr.set("coarse_y", 0);
+                if self.vram_addr.get(BitsId::CoarseY) == 29{
+                    self.vram_addr.set(BitsId::CoarseY, 0);
     
-                    self.vram_addr.set("nametable_y", !self.vram_addr.get("nametable_y"));
-                } else if self.vram_addr.get("coarse_y") == 31{
-                    self.vram_addr.set("coarse_y", 0);
+                    self.vram_addr.set(BitsId::NametableY, !self.vram_addr.get(BitsId::NametableY));
+                } else if self.vram_addr.get(BitsId::CoarseY) == 31{
+                    self.vram_addr.set(BitsId::CoarseY, 0);
                 }else{
-                    self.vram_addr.set("coarse_y", self.vram_addr.get("coarse_y") + 1);
+                    self.vram_addr.set(BitsId::CoarseY, self.vram_addr.get(BitsId::CoarseY) + 1);
                 }
             }
         } 
     }
 
     fn transfer_addr_x(&mut self){
-        if self.mask_reg.get("render_background") != 0 || self.mask_reg.get("render_sprites") != 0{
-            self.vram_addr.set("nametable_x", self.tram_addr.get("nametable_x"));
-            self.vram_addr.set("coarse_x", self.tram_addr.get("coarse_x"));
+        if self.mask_reg.get(BitsId::RenderBackground) != 0 || self.mask_reg.get(BitsId::RenderSprites) != 0{
+            self.vram_addr.set(BitsId::NametableX, self.tram_addr.get(BitsId::NametableX));
+            self.vram_addr.set(BitsId::CoarseX, self.tram_addr.get(BitsId::CoarseX));
         }
     }
 
     fn transfer_addr_y(&mut self){
-        if self.mask_reg.get("render_background") != 0 || self.mask_reg.get("render_sprites") != 0{
-            self.vram_addr.set("fine_y", self.tram_addr.get("fine_y"));
+        if self.mask_reg.get(BitsId::RenderBackground) != 0 || self.mask_reg.get(BitsId::RenderSprites) != 0{
+            self.vram_addr.set(BitsId::FineY, self.tram_addr.get(BitsId::FineY));
 
-            self.vram_addr.set("nametable_y", self.tram_addr.get("nametable_y"));
-            self.vram_addr.set("coarse_y", self.tram_addr.get("coarse_y"));
+            self.vram_addr.set(BitsId::NametableY, self.tram_addr.get(BitsId::NametableY));
+            self.vram_addr.set(BitsId::CoarseY, self.tram_addr.get(BitsId::CoarseY));
         }
     }
 
@@ -483,7 +483,7 @@ impl PPU{
     }
 
     fn update_shifters(&mut self){
-        if self.mask_reg.get("render_background") != 0{
+        if self.mask_reg.get(BitsId::RenderBackground) != 0{
             self.bg_shifter_ptn_lo <<= 1;
             self.bg_shifter_ptn_hi <<= 1;
             self.bg_shifter_attrib_lo <<= 1;
@@ -493,13 +493,13 @@ impl PPU{
 
 
     pub fn clock(&mut self){
-        //self.mask_reg.set("render_background", 1);
-        //println!("{}",self.mask_reg.get("render_background"));
+        //self.mask_reg.set(BitsId::RenderBackground, 1);
+        //println!("{}",self.mask_reg.get(BitsId::RenderBackground));
 
 
         if self.scanline >= -1 && self.scanline < 240{
             if self.scanline == -1 && self.cycle == 1{
-                self.stat_reg.set("vertical_blank",0);
+                self.stat_reg.set(BitsId::VerticalBlank,0);
             }
             if self.cycle >= 2 && self.cycle < 258 || self.cycle >= 321 && self.cycle < 338{
                 self.update_shifters();
@@ -509,29 +509,29 @@ impl PPU{
                         self.bg_next_tile_id = self.ppu_read(0x2000 | (self.vram_addr.bits as u16 & 0x0FFF));
                     }
                     2 => {
-                        self.bg_next_tile_attrib = self.ppu_read((0x23C0|   (self.vram_addr.get("nametable_y") << 11)
-                                                                        |   (self.vram_addr.get("nametable_x") << 10)
-                                                                        |   ((self.vram_addr.get("coarse_y") >> 2) << 3)
-                                                                        |   (self.vram_addr.get("coarse_x") >> 2)) as u16); //Caution
+                        self.bg_next_tile_attrib = self.ppu_read((0x23C0|   (self.vram_addr.get(BitsId::NametableY) << 11)
+                                                                        |   (self.vram_addr.get(BitsId::NametableX) << 10)
+                                                                        |   ((self.vram_addr.get(BitsId::CoarseY) >> 2) << 3)
+                                                                        |   (self.vram_addr.get(BitsId::CoarseX) >> 2)) as u16); //Caution
                         
-                        if (self.vram_addr.get("coarse_y") & 0x02) != 0{
+                        if (self.vram_addr.get(BitsId::CoarseY) & 0x02) != 0{
                             self.bg_next_tile_attrib >>= 4;
                         }
-                        if (self.vram_addr.get("coarse_x") & 0x02) != 0{
+                        if (self.vram_addr.get(BitsId::CoarseX) & 0x02) != 0{
                             self.bg_next_tile_attrib >>= 2;
                         }
                         self.bg_next_tile_attrib &= 0x03;
                     }
 
                     4 => {
-                        self.bg_next_tile_lsb = self.ppu_read(((self.ctrl_reg.get("pattern_background") << 12)
-                            +   ((self.bg_next_tile_id as u128) << 4) 
-                            +   (self.vram_addr.get("fine_y") + 0)) as u16)
+                        self.bg_next_tile_lsb = self.ppu_read(((self.ctrl_reg.get(BitsId::PatternBackground) << 12)
+                            +   ((self.bg_next_tile_id as u16) << 4) 
+                            +   (self.vram_addr.get(BitsId::FineY) + 0)) as u16)
                     }
                     6 => {
-                        self.bg_next_tile_msb = self.ppu_read(((self.ctrl_reg.get("pattern_background") << 12)
-                        +   ((self.bg_next_tile_id as u128) << 4) 
-                        +   (self.vram_addr.get("fine_y") + 8)) as u16)
+                        self.bg_next_tile_msb = self.ppu_read(((self.ctrl_reg.get(BitsId::PatternBackground) << 12)
+                        +   ((self.bg_next_tile_id as u16) << 4) 
+                        +   (self.vram_addr.get(BitsId::FineY) + 8)) as u16)
 
                     }
                     7 => {
@@ -564,8 +564,8 @@ impl PPU{
 
         if self.scanline >= 241 && self.scanline < 261 {
             if self.scanline == 241 && self.cycle == 1{
-                self.stat_reg.set("vertical_blank",1);
-                if self.ctrl_reg.get("enable_nmi") == 1{
+                self.stat_reg.set(BitsId::VerticalBlank,1);
+                if self.ctrl_reg.get(BitsId::EnableNmi) == 1{
                     self.nmi = true;
                 }
             }
@@ -573,7 +573,7 @@ impl PPU{
 
         let mut bg_pixel: u8 = 0x00;
         let mut bg_pal: u8 = 0x00;
-        if self.mask_reg.get("render_background") != 0{
+        if self.mask_reg.get(BitsId::RenderBackground) != 0{
             //println!("rendering");
             let bit_mux = 0x8000 >> self.fine_x;
 
@@ -589,22 +589,13 @@ impl PPU{
         let px = self.get_colour_from_palette_ram(bg_pal, bg_pixel);
         //println!("{}, {},   ({},{},{})", bg_pixel, bg_pal, px.0,px.1,px.2);
 
-        self.sprScreen.SetPixel((self.cycle - 1) as i16, (self.scanline) as i16, px);
-        // let x: i32 = (self.cycle - 1) as i32;
-        // let y: i32 = self.scanline as i32;
-        // if x >= 0 && x < 256 && y >= 0 && y < 240{
-        //     //println!("{},{},{}", (y * 256 + x),x,y);
-        //     self.scr_buf[(y * 256 + x) as usize] = px.to_u32();
-        // }
-
-            //     let mut i: usize = 0;
-    //     for row in &self.sprSclreen.pixels {
-    //         for col in row{
-
-    //             buf[i] = col.to_u32();
-    //             i += 1;
-    //         }
-    //     }
+        //self.sprScreen.SetPixel((self.cycle - 1) as i16, (self.scanline) as i16, px);
+        let x: i32 = (self.cycle - 1) as i32;
+        let y: i32 = self.scanline as i32;
+        if x >= 0 && x < 256 && y >= 0 && y < 240{
+            //println!("{},{},{}", (y * 256 + x),x,y);
+            self.scr_buf[(y * 256 + x) as usize] = px.to_u32();
+        }
 
         self.cycle += 1;
         if self.cycle >= 341{
